@@ -13,7 +13,7 @@
 - **Framework/Library:** Spring 5.3.9, Spring Security, MyBatis
 - **Database & Cache:** Oracle 19c (Oracle Cloud), Redis
 - **Server:** Tomcat 9.0
-- **Test & Tool:** JUnit4, Postman, STS3
+- **Test & Tool:** JUnit4, Postman, STS3, K6
 - **VCS:** Git & GitHub
 
 ---
