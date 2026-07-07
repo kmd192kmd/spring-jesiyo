@@ -1,0 +1,286 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" font-family="'Noto Sans KR','Apple SD Gothic Neo','Segoe UI',sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="arrBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1d4ed8"/>
+    </marker>
+    <marker id="arrRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b91c1c"/>
+    </marker>
+    <marker id="arrGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#047857"/>
+    </marker>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef2ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="1100" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="800" y="48" text-anchor="middle" font-size="30" font-weight="700" fill="#0f172a">Jesiyo 시스템 아키텍처 (Spring Legacy + WebSocket + Redis + Oracle Cloud)</text>
+  <text x="800" y="78" text-anchor="middle" font-size="15" fill="#475569">중고거래 · 일반 경매 · 라이브 경매 · 실시간 채팅 통합 플랫폼</text>
+
+  <!-- ===================== Client Layer ===================== -->
+  <g>
+    <rect x="60" y="110" width="1480" height="120" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="80" y="140" font-size="17" font-weight="700" fill="#0f172a">① Client Layer</text>
+
+    <!-- Browser -->
+    <rect x="100" y="155" width="200" height="60" rx="10" fill="#dbeafe" stroke="#2563eb"/>
+    <text x="200" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">Web Browser</text>
+    <text x="200" y="200" text-anchor="middle" font-size="12" fill="#1e3a8a">JSP / JS / WebSocket</text>
+
+    <!-- Postman -->
+    <rect x="320" y="155" width="180" height="60" rx="10" fill="#fef3c7" stroke="#d97706"/>
+    <text x="410" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Postman</text>
+    <text x="410" y="200" text-anchor="middle" font-size="12" fill="#92400e">REST API 테스트</text>
+
+    <!-- Toss Pay UI -->
+    <rect x="520" y="155" width="220" height="60" rx="10" fill="#ede9fe" stroke="#7c3aed"/>
+    <text x="630" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#5b21b6">Toss Payments Widget</text>
+    <text x="630" y="200" text-anchor="middle" font-size="12" fill="#5b21b6">결제 SDK (브라우저)</text>
+
+    <!-- 외부 라이브러리 안내 -->
+    <rect x="780" y="155" width="270" height="60" rx="10" fill="#fce7f3" stroke="#be185d"/>
+    <text x="915" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#9d174d">SockJS / Native WebSocket</text>
+    <text x="915" y="200" text-anchor="middle" font-size="12" fill="#9d174d">ws://host/jesiyo/{bid-ws|liveAuction|chat/ws/{roomId}}</text>
+
+    <!-- Dev tools -->
+    <rect x="1080" y="155" width="200" height="60" rx="10" fill="#e2e8f0" stroke="#475569"/>
+    <text x="1180" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#1f2937">개발자 도구</text>
+    <text x="1180" y="200" text-anchor="middle" font-size="12" fill="#1f2937">Git · GitHub · STS3</text>
+
+    <rect x="1300" y="155" width="220" height="60" rx="10" fill="#dcfce7" stroke="#15803d"/>
+    <text x="1410" y="180" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">JUnit4 + spring-test</text>
+    <text x="1410" y="200" text-anchor="middle" font-size="12" fill="#14532d">DBTest / TradeTest 등</text>
+  </g>
+
+  <!-- 화살표: Client → WAS -->
+  <line x1="200" y1="215" x2="200" y2="270" stroke="#1d4ed8" stroke-width="2.2" marker-end="url(#arrBlue)"/>
+  <text x="215" y="252" font-size="12" fill="#1d4ed8">HTTP / HTTPS</text>
+  <line x1="630" y1="215" x2="630" y2="270" stroke="#7c3aed" stroke-width="2.2" marker-end="url(#arr)"/>
+  <text x="640" y="252" font-size="12" fill="#7c3aed">결제 리다이렉트</text>
+  <line x1="915" y1="215" x2="915" y2="270" stroke="#be185d" stroke-width="2.2" marker-end="url(#arr)"/>
+  <text x="930" y="252" font-size="12" fill="#be185d">WebSocket Handshake</text>
+
+  <!-- ===================== WAS Layer ===================== -->
+  <g>
+    <rect x="60" y="270" width="1480" height="540" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.8"/>
+    <text x="80" y="298" font-size="17" font-weight="700" fill="#0f172a">② WAS / Application — Apache Tomcat 9.0  ·  Spring Framework 5.3.9 (Legacy XML 설정)</text>
+
+    <!-- Filter / Servlet -->
+    <rect x="80" y="318" width="1440" height="78" rx="10" fill="#fff7ed" stroke="#ea580c"/>
+    <text x="100" y="343" font-size="14" font-weight="700" fill="#9a3412">Servlet Container · Filters (web.xml)</text>
+    <text x="100" y="362" font-size="12" fill="#7c2d12">CharacterEncodingFilter (UTF-8) → HiddenHttpMethodFilter (PUT/DELETE) → springSecurityFilterChain (DelegatingFilterProxy)</text>
+    <text x="100" y="381" font-size="12" fill="#7c2d12">→ ContextLoaderListener(root-context.xml + security-context.xml) → DispatcherServlet "appServlet" (servlet-context.xml)</text>
+
+    <!-- Spring Security 영역 -->
+    <rect x="80" y="408" width="430" height="180" rx="10" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="295" y="432" text-anchor="middle" font-size="14" font-weight="700" fill="#7f1d1d">Spring Security 5.3.9</text>
+    <text x="295" y="451" text-anchor="middle" font-size="12" fill="#7f1d1d">form-login · BCryptPasswordEncoder · CSRF disabled</text>
+
+    <rect x="100" y="465" width="180" height="50" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="190" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#7f1d1d">CustomUserDetailsService</text>
+    <text x="190" y="502" text-anchor="middle" font-size="11" fill="#7f1d1d">loadUserByUsername()</text>
+
+    <rect x="295" y="465" width="200" height="50" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="395" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#7f1d1d">CustomSuccessHandler</text>
+    <text x="395" y="502" text-anchor="middle" font-size="11" fill="#7f1d1d">세션에 user(MemberDto) 저장</text>
+
+    <rect x="100" y="525" width="395" height="50" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="297" y="546" text-anchor="middle" font-size="12" font-weight="700" fill="#7f1d1d">intercept-url 정책</text>
+    <text x="297" y="562" text-anchor="middle" font-size="11" fill="#7f1d1d">/member/login·regist permit · /member/mypage ROLE_USER · /direct-sales/* isAuthenticated</text>
+
+    <!-- Spring MVC 영역 -->
+    <rect x="525" y="408" width="500" height="180" rx="10" fill="#dbeafe" stroke="#1d4ed8"/>
+    <text x="775" y="432" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a8a">Spring MVC — DispatcherServlet</text>
+    <text x="775" y="451" text-anchor="middle" font-size="12" fill="#1e3a8a">@Controller(JSP) · @RestController(/api/**) · InternalResourceViewResolver</text>
+
+    <rect x="545" y="465" width="220" height="50" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="655" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">@Controller (JSP 렌더)</text>
+    <text x="655" y="502" text-anchor="middle" font-size="11" fill="#1e3a8a">Auction · Trade · Member · Chat · Main</text>
+
+    <rect x="780" y="465" width="225" height="50" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="892" y="486" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">@RestController (JSON)</text>
+    <text x="892" y="502" text-anchor="middle" font-size="11" fill="#1e3a8a">PaymentApi · LocationApi · CategoryApi · TradeApi · DirectSaleApi · ChatApi</text>
+
+    <rect x="545" y="525" width="460" height="50" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="775" y="546" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">CommonsMultipartResolver (10MB) · /resources, /upload, /profile 정적 매핑</text>
+    <text x="775" y="562" text-anchor="middle" font-size="11" fill="#1e3a8a">파일 업로드 저장 경로: file:///C:/dev/upload/</text>
+
+    <!-- WebSocket 영역 -->
+    <rect x="1040" y="408" width="480" height="180" rx="10" fill="#fce7f3" stroke="#be185d"/>
+    <text x="1280" y="432" text-anchor="middle" font-size="14" font-weight="700" fill="#9d174d">Spring WebSocket (TextWebSocketHandler)</text>
+    <text x="1280" y="451" text-anchor="middle" font-size="12" fill="#9d174d">@EnableWebSocket · setAllowedOrigins("*")</text>
+
+    <rect x="1060" y="465" width="140" height="115" rx="8" fill="#ffffff" stroke="#be185d"/>
+    <text x="1130" y="487" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">/bid-ws</text>
+    <text x="1130" y="505" text-anchor="middle" font-size="11" fill="#9d174d">BidWebSocketHandler</text>
+    <text x="1130" y="525" text-anchor="middle" font-size="11" fill="#9d174d">일반 경매 입찰</text>
+    <text x="1130" y="545" text-anchor="middle" font-size="11" fill="#9d174d">전역 broadcast</text>
+    <text x="1130" y="565" text-anchor="middle" font-size="10" fill="#9d174d">(sessions: List)</text>
+
+    <rect x="1215" y="465" width="140" height="115" rx="8" fill="#ffffff" stroke="#be185d"/>
+    <text x="1285" y="487" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">/liveAuction</text>
+    <text x="1285" y="505" text-anchor="middle" font-size="11" fill="#9d174d">LiveAuctionHandler</text>
+    <text x="1285" y="525" text-anchor="middle" font-size="11" fill="#9d174d">라이브 경매 송출</text>
+    <text x="1285" y="545" text-anchor="middle" font-size="11" fill="#9d174d">전역 broadcast</text>
+
+    <rect x="1370" y="465" width="140" height="115" rx="8" fill="#ffffff" stroke="#be185d"/>
+    <text x="1440" y="487" text-anchor="middle" font-size="12" font-weight="700" fill="#9d174d">/chat/ws/{roomId}</text>
+    <text x="1440" y="505" text-anchor="middle" font-size="11" fill="#9d174d">ChatWebSocketHandler</text>
+    <text x="1440" y="525" text-anchor="middle" font-size="11" fill="#9d174d">방별 세션 매니저</text>
+    <text x="1440" y="545" text-anchor="middle" font-size="11" fill="#9d174d">→ Redis Pub</text>
+    <text x="1440" y="563" text-anchor="middle" font-size="10" fill="#9d174d">(ConcurrentHashMap)</text>
+
+    <!-- Service / AOP / Tx -->
+    <rect x="80" y="608" width="700" height="190" rx="10" fill="#dcfce7" stroke="#15803d"/>
+    <text x="430" y="632" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">Service Layer (@Service · @Transactional)</text>
+
+    <rect x="100" y="650" width="200" height="50" rx="8" fill="#ffffff" stroke="#15803d"/>
+    <text x="200" y="671" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">AuctionService</text>
+    <text x="200" y="687" text-anchor="middle" font-size="11" fill="#14532d">placeBid · endAuctionEarly</text>
+
+    <rect x="305" y="650" width="220" height="50" rx="8" fill="#ffffff" stroke="#15803d"/>
+    <text x="415" y="671" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">LiveAuctionService</text>
+    <text x="415" y="687" text-anchor="middle" font-size="11" fill="#14532d">Redisson 분산 락 + Redis 캐시</text>
+
+    <rect x="530" y="650" width="240" height="50" rx="8" fill="#ffffff" stroke="#15803d"/>
+    <text x="650" y="671" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">PaymentService</text>
+    <text x="650" y="687" text-anchor="middle" font-size="11" fill="#14532d">RestTemplate → Toss confirm()</text>
+
+    <rect x="100" y="710" width="200" height="50" rx="8" fill="#ffffff" stroke="#15803d"/>
+    <text x="200" y="731" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">ChatService / RoomService</text>
+    <text x="200" y="747" text-anchor="middle" font-size="11" fill="#14532d">addChat · triggerRecommend</text>
+
+    <rect x="305" y="710" width="220" height="50" rx="8" fill="#ffffff" stroke="#15803d"/>
+    <text x="415" y="731" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">TradeService · DirectSaleService</text>
+    <text x="415" y="747" text-anchor="middle" font-size="11" fill="#14532d">중고거래/직거래 도메인</text>
+
+    <rect x="530" y="710" width="240" height="50" rx="8" fill="#ffffff" stroke="#15803d"/>
+    <text x="650" y="731" text-anchor="middle" font-size="12" font-weight="700" fill="#14532d">Member / Location / Category Service</text>
+    <text x="650" y="747" text-anchor="middle" font-size="11" fill="#14532d">회원 · 동네 · 카테고리</text>
+
+    <rect x="100" y="770" width="670" height="22" rx="6" fill="#fef3c7" stroke="#b45309"/>
+    <text x="435" y="787" text-anchor="middle" font-size="12" font-weight="700" fill="#7c2d12">@Aspect ChatRecommendAspect — @AfterReturning(triggerRecommend) → 카테고리 매칭 → 추천 상품 푸시</text>
+
+    <!-- Persistence Layer in WAS -->
+    <rect x="800" y="608" width="720" height="190" rx="10" fill="#fef9c3" stroke="#a16207"/>
+    <text x="1160" y="632" text-anchor="middle" font-size="14" font-weight="700" fill="#713f12">Persistence Layer — MyBatis 3.5.16 + Spring-JDBC</text>
+
+    <rect x="820" y="650" width="220" height="60" rx="8" fill="#ffffff" stroke="#a16207"/>
+    <text x="930" y="671" text-anchor="middle" font-size="12" font-weight="700" fill="#713f12">SqlSessionFactoryBean</text>
+    <text x="930" y="688" text-anchor="middle" font-size="11" fill="#713f12">classpath:mappers/*.xml (13개)</text>
+    <text x="930" y="704" text-anchor="middle" font-size="10" fill="#713f12">mapUnderscoreToCamelCase</text>
+
+    <rect x="1050" y="650" width="220" height="60" rx="8" fill="#ffffff" stroke="#a16207"/>
+    <text x="1160" y="671" text-anchor="middle" font-size="12" font-weight="700" fill="#713f12">SqlSessionTemplate</text>
+    <text x="1160" y="688" text-anchor="middle" font-size="11" fill="#713f12">@Repository DAO 14개</text>
+    <text x="1160" y="704" text-anchor="middle" font-size="10" fill="#713f12">Auction · Trade · Chat · Member ...</text>
+
+    <rect x="1280" y="650" width="225" height="60" rx="8" fill="#ffffff" stroke="#a16207"/>
+    <text x="1392" y="671" text-anchor="middle" font-size="12" font-weight="700" fill="#713f12">DataSourceTransactionManager</text>
+    <text x="1392" y="688" text-anchor="middle" font-size="11" fill="#713f12">tx:annotation-driven</text>
+    <text x="1392" y="704" text-anchor="middle" font-size="10" fill="#713f12">@Transactional 활성</text>
+
+    <rect x="820" y="720" width="685" height="68" rx="8" fill="#ffffff" stroke="#a16207"/>
+    <text x="1162" y="742" text-anchor="middle" font-size="12" font-weight="700" fill="#713f12">HikariCP DataSource (poolSize=4)</text>
+    <text x="1162" y="760" text-anchor="middle" font-size="11" fill="#713f12">jdbc:oracle:thin:@xhvnup5lje1tl88s_low?TNS_ADMIN=${wallet.path}</text>
+    <text x="1162" y="776" text-anchor="middle" font-size="11" fill="#713f12">connectionTestQuery="SELECT 1 FROM DUAL" · keepalive 5분 · maxLifetime 30분</text>
+  </g>
+
+  <!-- ===================== Infrastructure ===================== -->
+  <g>
+    <rect x="60" y="830" width="1480" height="240" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="1.8"/>
+    <text x="80" y="858" font-size="17" font-weight="700" fill="#0f172a">③ Infrastructure / Data Stores · External APIs</text>
+
+    <!-- Oracle 19c -->
+    <rect x="80" y="878" width="400" height="170" rx="12" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.6"/>
+    <text x="280" y="903" text-anchor="middle" font-size="15" font-weight="700" fill="#7f1d1d">Oracle 19c (Autonomous DB on OCI)</text>
+    <text x="280" y="925" text-anchor="middle" font-size="12" fill="#7f1d1d">ojdbc8 23.7.0 · oraclepki/osdt_core/osdt_cert</text>
+    <text x="280" y="945" text-anchor="middle" font-size="12" fill="#7f1d1d">Wallet 인증 (TNS_ADMIN, mTLS)</text>
+
+    <rect x="100" y="960" width="170" height="36" rx="6" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="185" y="983" text-anchor="middle" font-size="11" fill="#7f1d1d">member · auction · bid</text>
+    <rect x="280" y="960" width="180" height="36" rx="6" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="370" y="983" text-anchor="middle" font-size="11" fill="#7f1d1d">live_auction · live_bid · point_lock</text>
+    <rect x="100" y="1004" width="170" height="36" rx="6" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="185" y="1027" text-anchor="middle" font-size="11" fill="#7f1d1d">trade · direct_sale · category</text>
+    <rect x="280" y="1004" width="180" height="36" rx="6" fill="#ffffff" stroke="#b91c1c"/>
+    <text x="370" y="1027" text-anchor="middle" font-size="11" fill="#7f1d1d">chat_room · chat_log · location</text>
+
+    <!-- Redis -->
+    <rect x="500" y="878" width="400" height="170" rx="12" fill="#fae8ff" stroke="#a21caf" stroke-width="1.6"/>
+    <text x="700" y="903" text-anchor="middle" font-size="15" font-weight="700" fill="#701a75">Redis (127.0.0.1:6379)</text>
+    <text x="700" y="925" text-anchor="middle" font-size="12" fill="#701a75">Lettuce + Spring Data Redis · Redisson 3.23</text>
+
+    <rect x="520" y="940" width="170" height="46" rx="6" fill="#ffffff" stroke="#a21caf"/>
+    <text x="605" y="958" text-anchor="middle" font-size="11" font-weight="700" fill="#701a75">캐시 (RedisTemplate)</text>
+    <text x="605" y="975" text-anchor="middle" font-size="10" fill="#701a75">liveAuction:highestBid:* / latestBids:*</text>
+
+    <rect x="700" y="940" width="180" height="46" rx="6" fill="#ffffff" stroke="#a21caf"/>
+    <text x="790" y="958" text-anchor="middle" font-size="11" font-weight="700" fill="#701a75">분산 락 (Redisson)</text>
+    <text x="790" y="975" text-anchor="middle" font-size="10" fill="#701a75">lock:liveAuction:{seq} (3s/10s)</text>
+
+    <rect x="520" y="996" width="360" height="44" rx="6" fill="#ffffff" stroke="#a21caf"/>
+    <text x="700" y="1015" text-anchor="middle" font-size="11" font-weight="700" fill="#701a75">Pub/Sub (chat 채널)</text>
+    <text x="700" y="1031" text-anchor="middle" font-size="10" fill="#701a75">RedisPublisher → MessageListenerContainer → RedisSubscriber</text>
+
+    <!-- 외부 API -->
+    <rect x="920" y="878" width="600" height="170" rx="12" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.6"/>
+    <text x="1220" y="903" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">외부 시스템 / 3rd-party APIs</text>
+
+    <rect x="940" y="918" width="180" height="58" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="1030" y="940" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">Toss Payments</text>
+    <text x="1030" y="958" text-anchor="middle" font-size="11" fill="#1e3a8a">/v1/payments/confirm</text>
+    <text x="1030" y="972" text-anchor="middle" font-size="10" fill="#1e3a8a">RestTemplate · Basic Auth</text>
+
+    <rect x="1130" y="918" width="180" height="58" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="1220" y="940" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">Gmail SMTP</text>
+    <text x="1220" y="958" text-anchor="middle" font-size="11" fill="#1e3a8a">JavaMailSenderImpl</text>
+    <text x="1220" y="972" text-anchor="middle" font-size="10" fill="#1e3a8a">아이디/비밀번호 찾기 메일</text>
+
+    <rect x="1320" y="918" width="180" height="58" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="1410" y="940" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">Kakao Local API</text>
+    <text x="1410" y="958" text-anchor="middle" font-size="11" fill="#1e3a8a">KakaoLocalClient</text>
+    <text x="1410" y="972" text-anchor="middle" font-size="10" fill="#1e3a8a">동네/주소 검색</text>
+
+    <rect x="940" y="990" width="560" height="50" rx="8" fill="#ffffff" stroke="#1d4ed8"/>
+    <text x="1220" y="1010" text-anchor="middle" font-size="12" font-weight="700" fill="#1e3a8a">로컬 파일 저장소</text>
+    <text x="1220" y="1027" text-anchor="middle" font-size="11" fill="#1e3a8a">file:///C:/dev/upload/ (상품 이미지)  ·  /profile/ (프로필 이미지)</text>
+  </g>
+
+  <!-- ===================== 연결선 (WAS 내부 ↔ 인프라) ===================== -->
+  <!-- HikariCP → Oracle -->
+  <line x1="1162" y1="788" x2="280" y2="878" stroke="#b91c1c" stroke-width="2.4" marker-end="url(#arrRed)"/>
+  <text x="700" y="828" font-size="12" fill="#b91c1c" font-weight="700">JDBC over TLS (Wallet)</text>
+
+  <!-- LiveAuctionService → Redis 캐시/락 -->
+  <line x1="415" y1="700" x2="700" y2="878" stroke="#a21caf" stroke-width="2.4" marker-end="url(#arr)"/>
+  <text x="525" y="800" font-size="12" fill="#a21caf" font-weight="700">RedisTemplate / Redisson</text>
+
+  <!-- ChatHandler → Redis Pub/Sub -->
+  <line x1="1440" y1="580" x2="700" y2="940" stroke="#a21caf" stroke-width="2.2" marker-end="url(#arr)" stroke-dasharray="6,4"/>
+  <text x="1080" y="780" font-size="12" fill="#a21caf" font-weight="700">publish("chat", JSON)</text>
+
+  <!-- PaymentService → Toss -->
+  <line x1="650" y1="700" x2="1030" y2="918" stroke="#1d4ed8" stroke-width="2.2" marker-end="url(#arrBlue)"/>
+  <text x="820" y="810" font-size="12" fill="#1d4ed8" font-weight="700">RestTemplate POST</text>
+
+  <!-- Spring → Gmail SMTP -->
+  <line x1="650" y1="730" x2="1220" y2="918" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#arrBlue)" stroke-dasharray="4,3"/>
+  <text x="900" y="850" font-size="11" fill="#1d4ed8">SMTP STARTTLS</text>
+
+  <!-- Member → Kakao -->
+  <line x1="650" y1="730" x2="1410" y2="918" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#arrBlue)" stroke-dasharray="4,3"/>
+  <text x="1100" y="858" font-size="11" fill="#1d4ed8">REST GET</text>
+
+  <!-- 범례 -->
+  <g transform="translate(60,1080)">
+    <text font-size="11" fill="#475569">실선=동기 호출 · 점선=메시지/이벤트 · ① 사용자 → ② Tomcat/Spring 처리 → ③ Oracle/Redis/외부 API와 연계</text>
+  </g>
+</svg>

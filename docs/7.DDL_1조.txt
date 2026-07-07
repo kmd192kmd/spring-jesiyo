@@ -1,0 +1,389 @@
+﻿CREATE TABLE `payment` (
+	`seq`	number	NOT NULL,
+	`amount`	number	NOT NULL,
+	`created_at`	date	NOT NULL	DEFAULT sysdate,
+	`payment_key`	varchar2(255)	NULL	COMMENT 'PG사 키',
+	`charge_id`	varchar2(255)	NULL,
+	`status`	varchar2(30)	NOT NULL,
+	`member_seq`	number	NOT NULL
+);
+
+CREATE TABLE `highest_bid` (
+	`seq`	number	NOT NULL,
+	`current_high_price`	number	NULL,
+	`bidder_id`	varchar2(1000)	NULL
+);
+
+CREATE TABLE `chat_log` (
+	`seq`	number	NOT NULL,
+	`content`	varchar2(4000)	NOT NULL,
+	`regdate`	date	NOT NULL	DEFAULT sysdate,
+	`type`	number	NOT NULL	COMMENT '1:전체 2:공지 3:입찰 4:이모티콘',
+	`chat_member_seq`	number	NOT NULL	COMMENT '채팅한사람',
+	`chat_room_seq`	number	NOT NULL
+);
+
+CREATE TABLE `user_block` (
+	`seq`	number	NOT NULL,
+	`reason`	varchar2(1000)	NULL,
+	`block_date`	date	NOT NULL	DEFAULT sysdate,
+	`blocker_seq`	number	NOT NULL,
+	`blocked_seq`	number	NOT NULL
+);
+
+CREATE TABLE `member` (
+	`seq`	number	NOT NULL,
+	`name`	varchar2(1000)	NOT NULL,
+	`point`	number	NOT NULL	DEFAULT 0,
+	`ID`	varchar2(1000)	NOT NULL	COMMENT 'unique',
+	`PW`	varchar2(1000)	NOT NULL,
+	`address`	varchar2(1000)	NOT NULL,
+	`birth`	date	NOT NULL,
+	`nickname`	varchar2(1000)	NOT NULL	COMMENT 'unique',
+	`permission`	number	NOT NULL	DEFAULT 0	COMMENT '0: 일반 회원, 1: 관리자',
+	`regdate`	date	NOT NULL	DEFAULT sysdate,
+	`pw_token`	varchar2(1000)	NULL	DEFAULT null	COMMENT 'unique',
+	`token_expiry`	date	NULL	DEFAULT null,
+	`status`	number	NOT NULL	DEFAULT 0	COMMENT '0: 활성, 1: 비활성화',
+	`email_address`	varchar2(1000)	NOT NULL,
+	`profile_img`	varchar2(1000)	NOT NULL	DEFAULT default.png
+);
+
+CREATE TABLE `point_lock` (
+	`seq`	number	NOT NULL,
+	`amount`	number	NULL,
+	`status`	number(1)	NOT NULL	COMMENT '잠김(0), 풀림(1), 사용(2)',
+	`member_seq`	number	NOT NULL,
+	`auction_seq`	number	NULL,
+	`live_auction_seq`	number	NULL
+);
+
+CREATE TABLE `trade` (
+	`seq`	number	NOT NULL,
+	`status`	varchar2(30)	NOT NULL	DEFAULT '확인요청중',
+	`created_at`	date	NOT NULL	DEFAULT sysdate,
+	`completed_at`	date	NULL,
+	`direct_sale_seq`	number	NOT NULL,
+	`buyer_seq`	number	NOT NULL,
+	`seller_seq`	number	NOT NULL
+);
+
+CREATE TABLE `auction` (
+	`seq`	number	NOT NULL,
+	`name`	varchar2(200)	NOT NULL,
+	`bid_open_price`	number	NOT NULL,
+	`image`	varchar2(500)	NOT NULL	DEFAULT default_image,
+	`end_date`	date	NOT NULL,
+	`description`	varchar2(1000)	NOT NULL,
+	`created_at`	date	NOT NULL	DEFAULT sysdate,
+	`status`	number(1)	NOT NULL	COMMENT '경매중(0),  낙찰(1), 유찰(2), 경매취소(3)',
+	`winner_seq`	number	NULL,
+	`create_member_seq`	number	NOT NULL,
+	`category_seq`	number	NOT NULL
+);
+
+CREATE TABLE `keyword` (
+	`seq`	number	NOT NULL,
+	`word`	varchar2(100)	NOT NULL,
+	`regdate`	date	NOT NULL	DEFAULT sysdate,
+	`hit_count`	number	NOT NULL	DEFAULT 0
+);
+
+CREATE TABLE `direct_message` (
+	`seq`	number	NOT NULL,
+	`sender_seq`	number	NOT NULL,
+	`receiver_seq`	number	NOT NULL
+);
+
+CREATE TABLE `location` (
+	`seq`	number	NOT NULL,
+	`dong`	varchar2(20)	NOT NULL	COMMENT '카카오맵 좌표->주소변환 API',
+	`lat`	number(10,7)	NOT NULL,
+	`lng`	number(10,7)	NOT NULL,
+	`sigungu`	varchar2(20)	NOT NULL,
+	`sido`	varchar2(20)	NOT NULL
+);
+
+CREATE TABLE `member_interest` (
+	`seq`	number	NOT NULL,
+	`regdate`	date	NOT NULL	DEFAULT sysdate,
+	`member_seq`	number	NOT NULL,
+	`cate_seq`	number	NOT NULL
+);
+
+CREATE TABLE `bid_history` (
+	`seq`	number	NOT NULL,
+	`bid_price`	number	NOT NULL,
+	`bid_time`	date	NOT NULL	DEFAULT sysdate,
+	`status`	number(1)	NOT NULL	COMMENT '최고가(0), 패찰(1)',
+	`member_seq`	number	NOT NULL,
+	`auction_seq`	number	NOT NULL
+);
+
+CREATE TABLE `direct_message_log` (
+	`seq`	number	NOT NULL,
+	`content`	varchar2(4000)	NOT NULL,
+	`regdate`	date	NOT NULL	DEFAULT sysdate,
+	`direct_message_seq`	number	NOT NULL,
+	`sender_seq`	number	NOT NULL
+);
+
+CREATE TABLE `chat_room` (
+	`seq`	number	NOT NULL,
+	`title`	varchar2(100)	NOT NULL,
+	`status`	number(1)	NOT NULL	DEFAULT 1	COMMENT '1:운영중/2:삭제',
+	`max_member_cnt`	number	NOT NULL	DEFAULT 20	COMMENT '최대 50명까지 입장가능',
+	`current_member_cnt`	number	NOT NULL	DEFAULT 1	COMMENT '채팅방참여자count',
+	`code`	varchar(8)	NOT NULL	COMMENT 'unique',
+	`category_seq`	number	NOT NULL,
+	`member_seq`	number	NOT NULL
+);
+
+CREATE TABLE `category` (
+	`seq`	number	NOT NULL,
+	`name`	varchar2(20)	NOT NULL,
+	`parent_seq`	number	NULL
+);
+
+CREATE TABLE `live_auction_schedule` (
+	`seq`	number	NOT NULL,
+	`broadcast_date`	date	NOT NULL,
+	`broadcast_status`	number(1)	NOT NULL	COMMENT '대기중(0), 방송중(1), 종료(2), 취소(3)',
+	`live_auction_seq`	number	NOT NULL
+);
+
+CREATE TABLE `live_bid_history` (
+	`seq`	number	NOT NULL,
+	`bid_price`	number	NOT NULL,
+	`bid_time`	date	NOT NULL	DEFAULT sysdate,
+	`status`	number(1)	NOT NULL	COMMENT '최고가(0), 패찰(1)',
+	`member_seq`	number	NOT NULL,
+	`live_auction_seq`	number	NOT NULL
+);
+
+CREATE TABLE `member_location` (
+	`seq`	VARCHAR(255)	NOT NULL,
+	`member_seq`	number	NOT NULL,
+	`location_seq`	number	NOT NULL,
+	`is_main`	number(1)	NOT NULL	DEFAULT 0
+);
+
+CREATE TABLE `chat_member` (
+	`seq`	number	NOT NULL,
+	`last_read_message`	number	NULL	COMMENT '테이블X논리적인  외래키(채팅방 내역의 seq)',
+	`alarm`	number	NOT NULL	DEFAULT 0	COMMENT '0:알림 무시 상태 / 1: 알림을 받는 상태',
+	`status`	number	NOT NULL	DEFAULT 1	COMMENT '0:상시오프라인/1:온라인/2:다른일/3:오프라인',
+	`member_seq`	number	NOT NULL,
+	`chat_room_seq`	number	NOT NULL
+);
+
+CREATE TABLE `trade_review` (
+	`seq`	number	NOT NULL,
+	`trade_seq`	number	NOT NULL,
+	`seller_seq`	number	NOT NULL,
+	`buyer_seq`	number	NOT NULL,
+	`score`	number	NOT NULL
+);
+
+CREATE TABLE `wallet_history` (
+	`seq`	number	NOT NULL,
+	`amount`	number	NOT NULL,
+	`point_after`	number	NOT NULL,
+	`ref_type`	varchar2(30)	NOT NULL,
+	`ref_id`	number	NOT NULL,
+	`member_seq`	number	NOT NULL
+);
+
+CREATE TABLE `live_auction` (
+	`seq`	number	NOT NULL,
+	`name`	varchar2(200)	NOT NULL,
+	`bid_open_price`	number	NOT NULL,
+	`image`	varchar2(500)	NOT NULL	DEFAULT default_image,
+	`description`	varchar2(1000)	NOT NULL,
+	`created_at`	date	NOT NULL	DEFAULT sysdate,
+	`status`	number(1)	NOT NULL	COMMENT '대기중(0), 경매중(1), 종료(2), 취소(3)',
+	`current_high_price`	number	NULL,
+	`winner_seq`	number	NULL,
+	`create_member_seq`	number	NOT NULL,
+	`category_seq`	number	NOT NULL
+);
+
+CREATE TABLE `withdraw_request` (
+	`seq`	number	NOT NULL	COMMENT '경매 락 금액 신경써야됨',
+	`amount`	number	NOT NULL,
+	`bank_name`	varchar2(30)	NOT NULL,
+	`account_number`	varchar2(50)	NOT NULL,
+	`account_holder`	varchar2(30)	NOT NULL,
+	`status`	varchar2(30)	NOT NULL	DEFAULT '승인대기중',
+	`member_seq`	number	NOT NULL
+);
+
+CREATE TABLE `auction_master` (
+	`seq`	number	NOT NULL,
+	`type`	number(1)	NOT NULL	COMMENT '일반경매(0), 라이브경매(1)'
+);
+
+CREATE TABLE `direct_sale` (
+	`seq`	number	NOT NULL,
+	`name`	varchar2(255)	NOT NULL,
+	`description`	varchar2(4000)	NULL	COMMENT '(선택)',
+	`status`	varchar2(20)	NOT NULL	DEFAULT '판매중',
+	`product_name`	varchar2(255)	NOT NULL,
+	`image_url`	varchar2(500)	NOT NULL	DEFAULT '/images/default-product.jpg'	COMMENT '(선택)',
+	`price`	number	NOT NULL,
+	`created_at`	date	NOT NULL	DEFAULT sysdate,
+	`seller_seq`	number	NOT NULL,
+	`category_seq`	number	NOT NULL,
+	`trade_location_seq`	number	NULL	COMMENT '(선택)'
+);
+
+CREATE TABLE `trade_location` (
+	`seq`	number	NOT NULL,
+	`dong`	varchar2(20)	NOT NULL,
+	`lat`	number(10,7)	NOT NULL,
+	`lng`	number(10,7)	NOT NULL
+);
+
+CREATE TABLE `notification` (
+	`seq`	number	NOT NULL,
+	`message`	varchar2(255)	NOT NULL,
+	`is_read`	varchar2(1)	NOT NULL	DEFAULT 'N',
+	`created_at`	date	NOT NULL	DEFAULT sysdate,
+	`ref_type`	varchar2(50)	NOT NULL,
+	`ref_seq`	number	NOT NULL,
+	`member_seq`	number	NOT NULL
+);
+
+ALTER TABLE `payment` ADD CONSTRAINT `PK_PAYMENT` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `highest_bid` ADD CONSTRAINT `PK_HIGHEST_BID` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `chat_log` ADD CONSTRAINT `PK_CHAT_LOG` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `user_block` ADD CONSTRAINT `PK_USER_BLOCK` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `member` ADD CONSTRAINT `PK_MEMBER` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `point_lock` ADD CONSTRAINT `PK_POINT_LOCK` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `trade` ADD CONSTRAINT `PK_TRADE` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `auction` ADD CONSTRAINT `PK_AUCTION` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `keyword` ADD CONSTRAINT `PK_KEYWORD` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `direct_message` ADD CONSTRAINT `PK_DIRECT_MESSAGE` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `location` ADD CONSTRAINT `PK_LOCATION` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `member_interest` ADD CONSTRAINT `PK_MEMBER_INTEREST` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `bid_history` ADD CONSTRAINT `PK_BID_HISTORY` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `direct_message_log` ADD CONSTRAINT `PK_DIRECT_MESSAGE_LOG` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `chat_room` ADD CONSTRAINT `PK_CHAT_ROOM` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `category` ADD CONSTRAINT `PK_CATEGORY` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `live_auction_schedule` ADD CONSTRAINT `PK_LIVE_AUCTION_SCHEDULE` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `live_bid_history` ADD CONSTRAINT `PK_LIVE_BID_HISTORY` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `member_location` ADD CONSTRAINT `PK_MEMBER_LOCATION` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `chat_member` ADD CONSTRAINT `PK_CHAT_MEMBER` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `trade_review` ADD CONSTRAINT `PK_TRADE_REVIEW` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `wallet_history` ADD CONSTRAINT `PK_WALLET_HISTORY` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `live_auction` ADD CONSTRAINT `PK_LIVE_AUCTION` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `withdraw_request` ADD CONSTRAINT `PK_WITHDRAW_REQUEST` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `auction_master` ADD CONSTRAINT `PK_AUCTION_MASTER` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `direct_sale` ADD CONSTRAINT `PK_DIRECT_SALE` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `trade_location` ADD CONSTRAINT `PK_TRADE_LOCATION` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `notification` ADD CONSTRAINT `PK_NOTIFICATION` PRIMARY KEY (
+	`seq`
+);
+
+ALTER TABLE `highest_bid` ADD CONSTRAINT `FK_live_auction_TO_highest_bid_1` FOREIGN KEY (
+	`seq`
+)
+REFERENCES `live_auction` (
+	`seq`
+);
+
+ALTER TABLE `auction` ADD CONSTRAINT `FK_auction_master_TO_auction_1` FOREIGN KEY (
+	`seq`
+)
+REFERENCES `auction_master` (
+	`seq`
+);
+
+ALTER TABLE `live_auction` ADD CONSTRAINT `FK_auction_master_TO_live_auction_1` FOREIGN KEY (
+	`seq`
+)
+REFERENCES `auction_master` (
+	`seq`
+);
+

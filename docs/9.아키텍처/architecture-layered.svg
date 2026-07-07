@@ -1,0 +1,395 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" font-family="'Noto Sans KR','Apple SD Gothic Neo','Segoe UI',sans-serif">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="1100" fill="#f8fafc"/>
+
+  <text x="800" y="48" text-anchor="middle" font-size="28" font-weight="700" fill="#0f172a">Jesiyo 계층형 아키텍처 · 패키지 ↔ 컴포넌트 매핑</text>
+  <text x="800" y="76" text-anchor="middle" font-size="14" fill="#475569">Presentation → Service(+AOP) → Persistence(MyBatis) → DB/Cache/External  /  9개 도메인을 동일한 4-Tier 구조로 일관 운영</text>
+
+  <!-- Layer headers -->
+  <g font-size="14" font-weight="700" fill="#1e293b">
+    <rect x="40" y="100" width="200" height="56" rx="10" fill="#e0e7ff" stroke="#4338ca"/>
+    <text x="140" y="124" text-anchor="middle" fill="#312e81">Presentation</text>
+    <text x="140" y="142" text-anchor="middle" font-size="11" fill="#312e81">Controller / API / Handler</text>
+
+    <rect x="40" y="172" width="200" height="56" rx="10" fill="#dcfce7" stroke="#15803d"/>
+    <text x="140" y="196" text-anchor="middle" fill="#14532d">Service</text>
+    <text x="140" y="214" text-anchor="middle" font-size="11" fill="#14532d">@Service · @Transactional · AOP</text>
+
+    <rect x="40" y="244" width="200" height="56" rx="10" fill="#fef9c3" stroke="#a16207"/>
+    <text x="140" y="268" text-anchor="middle" fill="#713f12">Persistence</text>
+    <text x="140" y="286" text-anchor="middle" font-size="11" fill="#713f12">DAO + MyBatis Mapper</text>
+
+    <rect x="40" y="316" width="200" height="56" rx="10" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="140" y="340" text-anchor="middle" fill="#7f1d1d">Data / External</text>
+    <text x="140" y="358" text-anchor="middle" font-size="11" fill="#7f1d1d">Oracle 19c · Redis · API</text>
+  </g>
+
+  <!-- ===== 도메인별 컬럼 ===== -->
+  <!-- 9 columns from x=260 to x=1560, each ~145px wide -->
+  <g font-size="11" fill="#0f172a">
+
+    <!-- Column 1: Member -->
+    <g>
+      <rect x="260" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="330" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Member</text>
+      <text x="330" y="136" text-anchor="middle" font-size="10" fill="#312e81">MemberController</text>
+      <text x="330" y="150" text-anchor="middle" font-size="10" fill="#312e81">Login·Regist·FindId·Pw</text>
+
+      <rect x="260" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="330" y="192" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">CustomUserDetailsService</text>
+      <text x="330" y="208" text-anchor="middle" font-size="10" fill="#14532d">CustomSuccessHandler</text>
+      <text x="330" y="222" text-anchor="middle" font-size="10" fill="#14532d">CustomUser(MemberDto)</text>
+
+      <rect x="260" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="330" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">MemberDao</text>
+      <text x="330" y="282" text-anchor="middle" font-size="10" fill="#713f12">mappers/member.xml</text>
+
+      <rect x="260" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="330" y="337" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">member 테이블</text>
+      <text x="330" y="354" text-anchor="middle" font-size="10" fill="#7f1d1d">+ Gmail SMTP</text>
+    </g>
+
+    <!-- Column 2: Auction (일반 경매) -->
+    <g>
+      <rect x="410" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="480" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Auction (일반)</text>
+      <text x="480" y="136" text-anchor="middle" font-size="10" fill="#312e81">AuctionController</text>
+      <text x="480" y="150" text-anchor="middle" font-size="10" fill="#312e81">+ BidWebSocketHandler</text>
+
+      <rect x="410" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="480" y="192" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">AuctionService</text>
+      <text x="480" y="208" text-anchor="middle" font-size="10" fill="#14532d">placeBid · cancel</text>
+      <text x="480" y="222" text-anchor="middle" font-size="10" fill="#14532d">endAuctionEarlyWithPoint</text>
+
+      <rect x="410" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="480" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">AuctionDao</text>
+      <text x="480" y="282" text-anchor="middle" font-size="10" fill="#713f12">+ AuctionRecommendDao</text>
+
+      <rect x="410" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="480" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">auction · bid</text>
+      <text x="480" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">point_lock</text>
+    </g>
+
+    <!-- Column 3: LiveAuction -->
+    <g>
+      <rect x="560" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="630" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">LiveAuction</text>
+      <text x="630" y="136" text-anchor="middle" font-size="10" fill="#312e81">LiveAuctionController</text>
+      <text x="630" y="150" text-anchor="middle" font-size="10" fill="#312e81">+ LiveAuctionHandler(WS)</text>
+
+      <rect x="560" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="630" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">LiveAuctionService</text>
+      <text x="630" y="205" text-anchor="middle" font-size="10" fill="#14532d">Redisson tryLock(3s,10s)</text>
+      <text x="630" y="220" text-anchor="middle" font-size="10" fill="#14532d">Redis Cache 갱신</text>
+
+      <rect x="560" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="630" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">LiveAuctionDao</text>
+      <text x="630" y="282" text-anchor="middle" font-size="10" fill="#713f12">mappers/liveAuction.xml</text>
+
+      <rect x="560" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="630" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">live_auction · live_bid</text>
+      <text x="630" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">+ Redis 캐시/락</text>
+    </g>
+
+    <!-- Column 4: Chat -->
+    <g>
+      <rect x="710" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="780" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Chat</text>
+      <text x="780" y="136" text-anchor="middle" font-size="10" fill="#312e81">ChatController · ApiCtrl</text>
+      <text x="780" y="150" text-anchor="middle" font-size="10" fill="#312e81">ChatWebSocketHandler</text>
+
+      <rect x="710" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="780" y="190" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">ChatService · RoomService</text>
+      <text x="780" y="206" text-anchor="middle" font-size="10" fill="#14532d">RedisPublisher / Subscriber</text>
+      <text x="780" y="220" text-anchor="middle" font-size="10" fill="#14532d">SessionManager · Aspect</text>
+
+      <rect x="710" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="780" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">ChatDao · ChatRoomDao</text>
+      <text x="780" y="282" text-anchor="middle" font-size="10" fill="#713f12">chat · chat-room · chat-member</text>
+
+      <rect x="710" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="780" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">chat_log · chat_room</text>
+      <text x="780" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">+ Redis Pub/Sub</text>
+    </g>
+
+    <!-- Column 5: Trade -->
+    <g>
+      <rect x="860" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="930" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Trade</text>
+      <text x="930" y="136" text-anchor="middle" font-size="10" fill="#312e81">TradeController</text>
+      <text x="930" y="150" text-anchor="middle" font-size="10" fill="#312e81">TradeApi (REST)</text>
+
+      <rect x="860" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="930" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">TradeService</text>
+      <text x="930" y="212" text-anchor="middle" font-size="10" fill="#14532d">거래완료 · 후기 등록</text>
+
+      <rect x="860" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="930" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">TradeDao</text>
+      <text x="930" y="282" text-anchor="middle" font-size="10" fill="#713f12">mappers/trade.xml</text>
+
+      <rect x="860" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="930" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">trade · trade_review</text>
+    </g>
+
+    <!-- Column 6: DirectSale -->
+    <g>
+      <rect x="1010" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="1080" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">DirectSale</text>
+      <text x="1080" y="136" text-anchor="middle" font-size="10" fill="#312e81">DirectSaleController</text>
+      <text x="1080" y="150" text-anchor="middle" font-size="10" fill="#312e81">DirectSaleApi</text>
+
+      <rect x="1010" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="1080" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">DirectSaleService</text>
+      <text x="1080" y="212" text-anchor="middle" font-size="10" fill="#14532d">+ TimeUtil</text>
+
+      <rect x="1010" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="1080" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">DirectSaleDao</text>
+      <text x="1080" y="282" text-anchor="middle" font-size="10" fill="#713f12">+ DirectSaleRecommendDao</text>
+
+      <rect x="1010" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="1080" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">direct_sale</text>
+      <text x="1080" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">파일 업로드(C:/dev/upload)</text>
+    </g>
+
+    <!-- Column 7: Payment -->
+    <g>
+      <rect x="1160" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="1230" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Payment</text>
+      <text x="1230" y="136" text-anchor="middle" font-size="10" fill="#312e81">PaymentController</text>
+      <text x="1230" y="150" text-anchor="middle" font-size="10" fill="#312e81">PaymentApi (REST)</text>
+
+      <rect x="1160" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="1230" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">PaymentService</text>
+      <text x="1230" y="212" text-anchor="middle" font-size="10" fill="#14532d">RestTemplate→Toss confirm</text>
+
+      <rect x="1160" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="1230" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">PaymentDao</text>
+      <text x="1230" y="282" text-anchor="middle" font-size="10" fill="#713f12">mappers/payment.xml</text>
+
+      <rect x="1160" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="1230" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">payment 테이블</text>
+      <text x="1230" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">+ Toss API</text>
+    </g>
+
+    <!-- Column 8: Location -->
+    <g>
+      <rect x="1310" y="100" width="140" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="1380" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Location</text>
+      <text x="1380" y="136" text-anchor="middle" font-size="10" fill="#312e81">LocationController</text>
+      <text x="1380" y="150" text-anchor="middle" font-size="10" fill="#312e81">LocationApi (REST)</text>
+
+      <rect x="1310" y="172" width="140" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="1380" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">LocationService</text>
+      <text x="1380" y="212" text-anchor="middle" font-size="10" fill="#14532d">TradeLocationService</text>
+
+      <rect x="1310" y="244" width="140" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="1380" y="265" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">LocationDao</text>
+      <text x="1380" y="282" text-anchor="middle" font-size="10" fill="#713f12">TradeLocationDao</text>
+
+      <rect x="1310" y="316" width="140" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="1380" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">location · trade_location</text>
+      <text x="1380" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">+ Kakao Local API</text>
+    </g>
+
+    <!-- Column 9: Category -->
+    <g>
+      <rect x="1460" y="100" width="120" height="56" rx="8" fill="#ffffff" stroke="#4338ca"/>
+      <text x="1520" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#312e81">Category</text>
+      <text x="1520" y="136" text-anchor="middle" font-size="10" fill="#312e81">CategoryController</text>
+      <text x="1520" y="150" text-anchor="middle" font-size="10" fill="#312e81">CategoryApi</text>
+
+      <rect x="1460" y="172" width="120" height="56" rx="8" fill="#ffffff" stroke="#15803d"/>
+      <text x="1520" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">CategoryService</text>
+
+      <rect x="1460" y="244" width="120" height="56" rx="8" fill="#ffffff" stroke="#a16207"/>
+      <text x="1520" y="272" text-anchor="middle" font-size="11" font-weight="700" fill="#713f12">CategoryDao</text>
+
+      <rect x="1460" y="316" width="120" height="56" rx="8" fill="#ffffff" stroke="#b91c1c"/>
+      <text x="1520" y="334" text-anchor="middle" font-size="11" font-weight="700" fill="#7f1d1d">category</text>
+      <text x="1520" y="351" text-anchor="middle" font-size="10" fill="#7f1d1d">findMatched(content)</text>
+    </g>
+
+  </g>
+
+  <!-- Layer 흐름 화살표 -->
+  <g stroke="#475569" stroke-width="1.5" fill="none">
+    <line x1="800" y1="156" x2="800" y2="172" marker-end="url(#ar)"/>
+    <line x1="800" y1="228" x2="800" y2="244" marker-end="url(#ar)"/>
+    <line x1="800" y1="300" x2="800" y2="316" marker-end="url(#ar)"/>
+  </g>
+
+  <!-- ============== 핵심 시퀀스 다이어그램 (라이브 경매 입찰) ============== -->
+  <g>
+    <rect x="40" y="410" width="760" height="360" rx="14" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="60" y="438" font-size="16" font-weight="700" fill="#0f172a">시퀀스 ① 라이브 경매 입찰 (Redisson 분산 락 + Redis 캐시)</text>
+
+    <!-- Lifelines -->
+    <g font-size="11" fill="#0f172a" font-weight="700">
+      <rect x="60"  y="450" width="120" height="26" rx="6" fill="#dbeafe" stroke="#1d4ed8"/>
+      <text x="120" y="468" text-anchor="middle">Browser</text>
+      <line x1="120" y1="476" x2="120" y2="755" stroke="#1d4ed8" stroke-dasharray="3,3"/>
+
+      <rect x="200" y="450" width="120" height="26" rx="6" fill="#fce7f3" stroke="#be185d"/>
+      <text x="260" y="468" text-anchor="middle">LiveAuctionHandler</text>
+      <line x1="260" y1="476" x2="260" y2="755" stroke="#be185d" stroke-dasharray="3,3"/>
+
+      <rect x="340" y="450" width="130" height="26" rx="6" fill="#dcfce7" stroke="#15803d"/>
+      <text x="405" y="468" text-anchor="middle">LiveAuctionService</text>
+      <line x1="405" y1="476" x2="405" y2="755" stroke="#15803d" stroke-dasharray="3,3"/>
+
+      <rect x="490" y="450" width="120" height="26" rx="6" fill="#fae8ff" stroke="#a21caf"/>
+      <text x="550" y="468" text-anchor="middle">Redis</text>
+      <line x1="550" y1="476" x2="550" y2="755" stroke="#a21caf" stroke-dasharray="3,3"/>
+
+      <rect x="630" y="450" width="140" height="26" rx="6" fill="#fee2e2" stroke="#b91c1c"/>
+      <text x="700" y="468" text-anchor="middle">Oracle (HikariCP)</text>
+      <line x1="700" y1="476" x2="700" y2="755" stroke="#b91c1c" stroke-dasharray="3,3"/>
+    </g>
+
+    <!-- Steps -->
+    <g font-size="11" fill="#0f172a">
+      <line x1="120" y1="500" x2="260" y2="500" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="125" y="495">① WS send {bidPrice}</text>
+
+      <line x1="260" y1="525" x2="405" y2="525" stroke="#15803d" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="265" y="520">② placeLiveBid()</text>
+
+      <line x1="405" y1="552" x2="550" y2="552" stroke="#a21caf" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="410" y="547">③ GET highestBid (Fail-Fast)</text>
+      <line x1="550" y1="572" x2="405" y2="572" stroke="#a21caf" stroke-width="1.4" marker-end="url(#ar)" stroke-dasharray="3,3"/>
+      <text x="410" y="588">④ 캐시값 응답</text>
+
+      <line x1="405" y1="612" x2="550" y2="612" stroke="#a21caf" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="410" y="607">⑤ Redisson tryLock("lock:liveAuction:{seq}", 3s/10s)</text>
+
+      <line x1="405" y1="642" x2="700" y2="642" stroke="#b91c1c" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="410" y="637">⑥ DB 이중검증 + bid INSERT (@Transactional)</text>
+
+      <line x1="405" y1="672" x2="550" y2="672" stroke="#a21caf" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="410" y="667">⑦ SET highestBid · latestBids (TTL 2h)</text>
+
+      <line x1="405" y1="702" x2="260" y2="702" stroke="#15803d" stroke-width="1.6" marker-end="url(#ar)" stroke-dasharray="3,3"/>
+      <text x="265" y="697">⑧ 결과 반환</text>
+
+      <line x1="260" y1="730" x2="120" y2="730" stroke="#be185d" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="125" y="725">⑨ broadcast(전체 세션)</text>
+    </g>
+  </g>
+
+  <!-- ============== 시퀀스 ② 채팅 메시지 (Redis Pub/Sub) ============== -->
+  <g>
+    <rect x="820" y="410" width="740" height="360" rx="14" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="840" y="438" font-size="16" font-weight="700" fill="#0f172a">시퀀스 ② 채팅 메시지 (방별 Pub/Sub + AOP 추천)</text>
+
+    <g font-size="11" fill="#0f172a" font-weight="700">
+      <rect x="840"  y="450" width="120" height="26" rx="6" fill="#dbeafe" stroke="#1d4ed8"/>
+      <text x="900" y="468" text-anchor="middle">Browser(roomId)</text>
+      <line x1="900" y1="476" x2="900" y2="755" stroke="#1d4ed8" stroke-dasharray="3,3"/>
+
+      <rect x="980" y="450" width="140" height="26" rx="6" fill="#fce7f3" stroke="#be185d"/>
+      <text x="1050" y="468" text-anchor="middle">ChatWebSocketHandler</text>
+      <line x1="1050" y1="476" x2="1050" y2="755" stroke="#be185d" stroke-dasharray="3,3"/>
+
+      <rect x="1140" y="450" width="120" height="26" rx="6" fill="#dcfce7" stroke="#15803d"/>
+      <text x="1200" y="468" text-anchor="middle">ChatService</text>
+      <line x1="1200" y1="476" x2="1200" y2="755" stroke="#15803d" stroke-dasharray="3,3"/>
+
+      <rect x="1280" y="450" width="120" height="26" rx="6" fill="#fae8ff" stroke="#a21caf"/>
+      <text x="1340" y="468" text-anchor="middle">Redis Pub/Sub</text>
+      <line x1="1340" y1="476" x2="1340" y2="755" stroke="#a21caf" stroke-dasharray="3,3"/>
+
+      <rect x="1420" y="450" width="120" height="26" rx="6" fill="#fef9c3" stroke="#a16207"/>
+      <text x="1480" y="468" text-anchor="middle">RedisSubscriber</text>
+      <line x1="1480" y1="476" x2="1480" y2="755" stroke="#a16207" stroke-dasharray="3,3"/>
+    </g>
+
+    <g font-size="11" fill="#0f172a">
+      <line x1="900" y1="500" x2="1050" y2="500" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="905" y="495">① WS open /chat/ws/{roomId}</text>
+
+      <line x1="1050" y1="525" x2="1200" y2="525" stroke="#15803d" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="1055" y="520">② addChat(dto) → DB 저장</text>
+
+      <line x1="1050" y1="555" x2="1340" y2="555" stroke="#a21caf" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="1055" y="550">③ RedisPublisher.publish("chat", json)</text>
+
+      <line x1="1340" y1="585" x2="1480" y2="585" stroke="#a16207" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="1345" y="580">④ MessageListener → onMessage</text>
+
+      <line x1="1480" y1="612" x2="900"  y2="612" stroke="#a16207" stroke-width="1.4" marker-end="url(#ar)"/>
+      <text x="905" y="607">⑤ ChatRoomSessionManager.getSessions(roomId) → broadcast</text>
+
+      <line x1="1200" y1="652" x2="1050" y2="652" stroke="#15803d" stroke-width="1.4" marker-end="url(#ar)" stroke-dasharray="3,3"/>
+      <text x="1055" y="647">⑥ triggerRecommend(dto, session)</text>
+
+      <rect x="985" y="660" width="555" height="50" rx="6" fill="#fef3c7" stroke="#b45309"/>
+      <text x="1262" y="678" text-anchor="middle" font-size="11" font-weight="700" fill="#7c2d12">⑦ AOP @AfterReturning ChatRecommendAspect</text>
+      <text x="1262" y="695" text-anchor="middle" font-size="10" fill="#7c2d12">CategoryDao.findMatched → AuctionRecommendDao + DirectSaleRecommendDao → RECOMMEND 메시지 전송</text>
+
+      <line x1="1050" y1="730" x2="900"  y2="730" stroke="#be185d" stroke-width="1.6" marker-end="url(#ar)"/>
+      <text x="905" y="725">⑧ 본인 세션에만 추천 푸시</text>
+    </g>
+  </g>
+
+  <!-- ============== Cross-cutting (보안/인프라/빌드) ============== -->
+  <g>
+    <rect x="40" y="800" width="1520" height="270" rx="14" fill="#ffffff" stroke="#94a3b8"/>
+    <text x="60" y="828" font-size="16" font-weight="700" fill="#0f172a">횡단 관심사 (Cross-cutting) · 빌드 / 보안 / 트랜잭션 / 모니터링</text>
+
+    <!-- Security -->
+    <rect x="60" y="848" width="350" height="200" rx="10" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="235" y="870" text-anchor="middle" font-size="13" font-weight="700" fill="#7f1d1d">Security</text>
+    <text x="80" y="892" font-size="11" fill="#7f1d1d">• Spring Security 5.3.9 form-login</text>
+    <text x="80" y="910" font-size="11" fill="#7f1d1d">• BCryptPasswordEncoder</text>
+    <text x="80" y="928" font-size="11" fill="#7f1d1d">• CustomUserDetailsService → CustomUser(MemberDto)</text>
+    <text x="80" y="946" font-size="11" fill="#7f1d1d">• CustomSuccessHandler → HttpSession.setAttribute("user", ...)</text>
+    <text x="80" y="964" font-size="11" fill="#7f1d1d">• intercept-url: ROLE_USER · isAuthenticated · permitAll</text>
+    <text x="80" y="982" font-size="11" fill="#7f1d1d">• CSRF disabled · X-Frame-Options SAMEORIGIN</text>
+    <text x="80" y="1000" font-size="11" fill="#7f1d1d">• HiddenHttpMethodFilter (PUT/DELETE)</text>
+    <text x="80" y="1018" font-size="11" fill="#7f1d1d">• CharacterEncodingFilter UTF-8</text>
+    <text x="80" y="1036" font-size="11" fill="#7f1d1d">• Oracle Wallet (mTLS) → DB 연결 자체 암호화</text>
+
+    <!-- Tx & AOP -->
+    <rect x="430" y="848" width="350" height="200" rx="10" fill="#dcfce7" stroke="#15803d"/>
+    <text x="605" y="870" text-anchor="middle" font-size="13" font-weight="700" fill="#14532d">Transaction · AOP · Concurrency</text>
+    <text x="450" y="892" font-size="11" fill="#14532d">• @Transactional · DataSourceTransactionManager</text>
+    <text x="450" y="910" font-size="11" fill="#14532d">• rollbackFor=Exception.class (입찰/정산)</text>
+    <text x="450" y="928" font-size="11" fill="#14532d">• &lt;aop:aspectj-autoproxy/&gt; 활성화</text>
+    <text x="450" y="946" font-size="11" fill="#14532d">• ChatRecommendAspect — @AfterReturning</text>
+    <text x="450" y="964" font-size="11" fill="#14532d">• Redisson 분산 락 (라이브 경매 동시성)</text>
+    <text x="450" y="982" font-size="11" fill="#14532d">• Redis Fail-Fast 캐시(최고가) → DB 부하 감소</text>
+    <text x="450" y="1000" font-size="11" fill="#14532d">• ConcurrentHashMap (방별 세션)</text>
+    <text x="450" y="1018" font-size="11" fill="#14532d">• point_lock 테이블 — 입찰 예치금 잠금</text>
+    <text x="450" y="1036" font-size="11" fill="#14532d">• Toss confirm 단계 멱등성 보장</text>
+
+    <!-- Infra & Build -->
+    <rect x="800" y="848" width="370" height="200" rx="10" fill="#dbeafe" stroke="#1d4ed8"/>
+    <text x="985" y="870" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a8a">Infra · Build · Test</text>
+    <text x="820" y="892" font-size="11" fill="#1e3a8a">• Tomcat 9.0 (Servlet 4.0, war 패키징)</text>
+    <text x="820" y="910" font-size="11" fill="#1e3a8a">• Java 11 · Maven (pom.xml)</text>
+    <text x="820" y="928" font-size="11" fill="#1e3a8a">• STS3 (Eclipse Spring) 개발 환경</text>
+    <text x="820" y="946" font-size="11" fill="#1e3a8a">• HikariCP (poolSize=4, keepalive 5m)</text>
+    <text x="820" y="964" font-size="11" fill="#1e3a8a">• Oracle ojdbc8 + oraclepki Wallet</text>
+    <text x="820" y="982" font-size="11" fill="#1e3a8a">• Lettuce + Spring Data Redis</text>
+    <text x="820" y="1000" font-size="11" fill="#1e3a8a">• Redisson 3.23 (분산 락)</text>
+    <text x="820" y="1018" font-size="11" fill="#1e3a8a">• JUnit4 + spring-test (DBTest, TradeTest 등)</text>
+    <text x="820" y="1036" font-size="11" fill="#1e3a8a">• Postman (REST 검증) · Git/GitHub (형상관리)</text>
+
+    <!-- Logging & Etc -->
+    <rect x="1190" y="848" width="370" height="200" rx="10" fill="#fef9c3" stroke="#a16207"/>
+    <text x="1375" y="870" text-anchor="middle" font-size="13" font-weight="700" fill="#713f12">Logging · Mail · 정적 자원</text>
+    <text x="1210" y="892" font-size="11" fill="#713f12">• SLF4J + Logback (logback.xml)</text>
+    <text x="1210" y="910" font-size="11" fill="#713f12">• log4jdbc-log4j2 (SQL 가독성 로깅)</text>
+    <text x="1210" y="928" font-size="11" fill="#713f12">• JavaMailSenderImpl (Gmail SMTP, STARTTLS)</text>
+    <text x="1210" y="946" font-size="11" fill="#713f12">• Jackson + Gson + json-simple</text>
+    <text x="1210" y="964" font-size="11" fill="#713f12">• CommonsMultipartResolver (10MB)</text>
+    <text x="1210" y="982" font-size="11" fill="#713f12">• 이미지 저장: file:///C:/dev/upload</text>
+    <text x="1210" y="1000" font-size="11" fill="#713f12">• 정적 매핑: /resources, /upload, /profile</text>
+    <text x="1210" y="1018" font-size="11" fill="#713f12">• InternalResourceViewResolver → /WEB-INF/views/*.jsp</text>
+    <text x="1210" y="1036" font-size="11" fill="#713f12">• db.properties (wallet.path · 계정정보)</text>
+  </g>
+</svg>

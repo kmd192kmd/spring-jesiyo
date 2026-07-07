@@ -51,7 +51,7 @@ public class ChatApiController {
 	
 	// 채티방 채팅 내역 가져오기
 	@GetMapping("/rooms/logs/{seq}")
-	public List<ChatRoomDto> getChatlogs(@PathVariable int seq) {
+	public List<ChatLogDto> getChatlogs(@PathVariable int seq) {
 	    return chatRoomService.getChatlogs(seq);
 	}
 	

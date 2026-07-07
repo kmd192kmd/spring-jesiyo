@@ -46,7 +46,7 @@ public class ChatRoomDao {
 		return template.selectOne("chat-room.getChatRoomSeq", dto);
 	}
 
-	public List<ChatRoomDto> getChatlogs(int seq) {
+	public List<ChatLogDto> getChatlogs(int seq) {
 		return template.selectList("chat-room.getChatLogs", seq);
 	}
 
