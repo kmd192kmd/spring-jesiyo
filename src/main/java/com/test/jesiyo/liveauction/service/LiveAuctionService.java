@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.test.jesiyo.liveauction.dto.LiveAuctionDto;
 import com.test.jesiyo.liveauction.dto.LiveBidDto;
 import com.test.jesiyo.liveauction.repository.LiveAuctionDao;
@@ -32,6 +34,12 @@ public class LiveAuctionService {
 	// JSON 변환용 객체 추가
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	
+	// [Hot Key 방어용 로컬 캐시] 생성 후 1초간 유지, 최대 10,000개 경매품 기억
+    private final Cache<Integer, Long> localHighestBidCache = Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.SECONDS) // 1초 뒤 자동 소멸
+            .maximumSize(10000)
+            .build();
+	
 	// Redis Cache Keys
 	private static final String HIGHEST_BID_KEY_PREFIX = "liveAuction:highestBid:";
 	private static final String LATEST_BIDS_KEY_PREFIX = "liveAuction:latestBids:";
@@ -46,157 +54,183 @@ public class LiveAuctionService {
 		return dao.getDetail(seq);
 	}
 	
-	//redis 적용
-	public LiveAuctionDto getHighestBid(int seq) {
-		
-		// 1) Redis에서 최고가를 먼저 꺼내봅니다.
-		Object cachedHighestStr = redisTemplate.opsForValue().get(HIGHEST_BID_KEY_PREFIX + seq);
-		
-		if (cachedHighestStr != null) {
-			// 2) Redis에 값이 있다면, DB에 가지 않고 임시 DTO를 만들어 바로 리턴합니다.
-			LiveAuctionDto dto = new LiveAuctionDto();
-			dto.setHighestBid(Long.parseLong(cachedHighestStr.toString()));
-			return dto;
+	// [조회 로직 수정] 핫키 완화 적용
+		public LiveAuctionDto getHighestBid(int seq) {
+			
+			// 0) [1차 방어선] 톰캣 서버 메모리(Local Cache)를 먼저 확인합니다.
+			Long localHighestBid = localHighestBidCache.getIfPresent(seq);
+			if (localHighestBid != null) {
+				LiveAuctionDto dto = new LiveAuctionDto();
+				dto.setHighestBid(localHighestBid);
+				return dto;
+			}
+			
+			// 1) Local에 없으면 [2차 방어선] Redis에서 최고가를 꺼내봅니다.
+			Object cachedHighestStr = redisTemplate.opsForValue().get(HIGHEST_BID_KEY_PREFIX + seq);
+			
+			if (cachedHighestStr != null) {
+				long redisHighestBid = Long.parseLong(cachedHighestStr.toString());
+				
+				// 💡 다음 조회를 위해 로컬 캐시에 저장 (Hot Key 트래픽 분산의 핵심)
+				localHighestBidCache.put(seq, redisHighestBid);
+				
+				LiveAuctionDto dto = new LiveAuctionDto();
+				dto.setHighestBid(redisHighestBid);
+				return dto;
+			}
+			
+			// 2) Redis에도 값이 없을 때만 DB를 조회합니다.
+			LiveAuctionDto dbDto = dao.getHighestBid(seq);
+			if (dbDto != null && dbDto.getHighestBid() != null) {
+				// 다음 조회를 위해 로컬과 레디스에 모두 채워둡니다.
+				localHighestBidCache.put(seq, dbDto.getHighestBid());
+				redisTemplate.opsForValue().set(HIGHEST_BID_KEY_PREFIX + seq, String.valueOf(dbDto.getHighestBid()), 2, TimeUnit.HOURS);
+			}
+			return dbDto;
+		}	
+
+		public LiveBidDto getMyBid(Map<String, Object> map) {
+			return dao.getMyBid(map);
 		}
 		
-		// 3) Redis에 값이 없을 때(서버 초기화 직후 등)만 오라클 DB를 조회합니다.
-		return dao.getHighestBid(seq);
-	}	
-	
-//	public LiveAuctionDto getHighestBid(int seq) {
-//		
-//		return dao.getHighestBid(seq);
-//	}
+		// [입찰 로직 수정] 핫키 완화 및 정합성 보장 버전
+		@Transactional(rollbackFor = Exception.class)
+		public Map<String, Object> placeLiveBid(Map<String, Object> paramMap) {
+			
+			Map<String, Object> result = new HashMap<>();
+			
+			int auctionSeq = Integer.parseInt(String.valueOf(paramMap.get("seq")));
+			long bidPrice = Long.parseLong(String.valueOf(paramMap.get("bidPrice")));
+			int memberSeq = Integer.parseInt(String.valueOf(paramMap.get("memberSeq")));
 
-	public LiveBidDto getMyBid(Map<String, Object> map) {
-		
-		return dao.getMyBid(map);
-	}
-	
-	//redis 적용버전
-	@Transactional(rollbackFor = Exception.class)
-	public Map<String, Object> placeLiveBid(Map<String, Object> paramMap) {
-		
-		Map<String, Object> result = new HashMap<>();
-		
-		int auctionSeq = Integer.parseInt(String.valueOf(paramMap.get("seq")));
-		long bidPrice = Long.parseLong(String.valueOf(paramMap.get("bidPrice")));
-		int memberSeq = Integer.parseInt(String.valueOf(paramMap.get("memberSeq")));
+			String highestBidKey = HIGHEST_BID_KEY_PREFIX + auctionSeq;
 
-		String highestBidKey = HIGHEST_BID_KEY_PREFIX + auctionSeq;
-
-		// ==========================================
-		// [1단계] Fail-Fast: Redis 캐시로 1차 차단 (DB 접근 X)
-		// ==========================================
-		Object cachedHighestStr = redisTemplate.opsForValue().get(highestBidKey);
-		if (cachedHighestStr != null) {
-			long cachedHighestBid = Long.parseLong(cachedHighestStr.toString());
-			if (bidPrice <= cachedHighestBid) {
+			// ==========================================
+			// [0단계] Fail-Fast 개량: 로컬 캐시로 먼저 튕겨내기 (Hot Key 차단)
+			// ==========================================
+			Long localHighestBid = localHighestBidCache.getIfPresent(auctionSeq);
+			if (localHighestBid != null && bidPrice <= localHighestBid) {
 				result.put("status", "fail");
-				result.put("msg", "현재 최고가보다 높은 금액만 입찰 가능합니다.");
-				return result;
-			}
-		}
-
-		// ==========================================
-		// [2단계] Redisson 분산 락 획득 시도 (대기열 생성)
-		// ==========================================
-		String lockKey = "lock:liveAuction:" + auctionSeq;
-		RLock lock = redissonClient.getLock(lockKey);
-
-		try {
-			// 최대 3초까지 락 획득 대기, 10초 후 자동 해제(Deadlock 방지)
-			boolean isLocked = lock.tryLock(3, 10, TimeUnit.SECONDS);
-			if (!isLocked) {
-				result.put("status", "fail");
-				result.put("msg", "현재 접속자가 많아 입찰이 지연되고 있습니다. 다시 시도해주세요.");
+				result.put("msg", "현재 최고가보다 높은 금액만 입찰 가능합니다. (로컬 검증)");
 				return result;
 			}
 
 			// ==========================================
-			// [3단계] Critical Section (DB 이중 검증 및 비즈니스 로직)
+			// [1단계] Fail-Fast: Redis 캐시로 2차 차단 (DB 접근 X)
 			// ==========================================
-			
-			// 1. DB 기준 최고가 재확인 (Double-Check)
-			LiveAuctionDto dtohasHighestBid = dao.getHighestBid(auctionSeq);
-			Long highestBid = null;
-			Integer highestBidMemberSeq = null;
-			
-			if (dtohasHighestBid != null && dtohasHighestBid.getHighestBid() != null) {
-				highestBid = dtohasHighestBid.getHighestBid();
-				highestBidMemberSeq = dtohasHighestBid.getHighestBidMemberSeq();
+			Object cachedHighestStr = redisTemplate.opsForValue().get(highestBidKey);
+			if (cachedHighestStr != null) {
+				long cachedHighestBid = Long.parseLong(cachedHighestStr.toString());
+				
+				// 로컬 캐시가 만료되었던 상태라면 최신 레디스 값으로 로컬 캐시를 갱신해줍니다.
+				localHighestBidCache.put(auctionSeq, cachedHighestBid);
+				
+				if (bidPrice <= cachedHighestBid) {
+					result.put("status", "fail");
+					result.put("msg", "현재 최고가보다 높은 금액만 입찰 가능합니다.");
+					return result;
+				}
 			}
-
-			if (highestBid != null && bidPrice <= highestBid) {
-				result.put("status", "fail");
-				result.put("msg", "현재 최고가보다 높은 금액만 입찰 가능합니다.");
-				return result;
-			}
-
-			// 2. 가용 예치금 실시간 검증 (동일인 연속 입찰 보정 포함)
-			long availablePoint = dao.getAvailablePoint(memberSeq);
-			if (highestBidMemberSeq != null && highestBidMemberSeq == memberSeq) {
-				availablePoint += highestBid;
-			}
-
-			if (availablePoint < bidPrice) {
-				result.put("status", "fail");
-				result.put("msg", "가용 예치금이 부족합니다. (현재 가용액: " + availablePoint + "원)");
-				return result;
-			}
-
-			// 3. 이전 락 해제
-			if (highestBid != null && highestBid > 0) {
-				Map<String, Object> unlockMap = new HashMap<>();
-				unlockMap.put("previousMemberSeq", highestBidMemberSeq);
-				unlockMap.put("auctionSeq", auctionSeq); 
-				dao.unlockPointLock(unlockMap);
-				dao.cancelPreviousLiveBid(paramMap); 
-			}
-
-			// 4. 신규 락 생성
-			paramMap.put("auctionSeq", auctionSeq); 
-			int lockResult = dao.insertPointLock(paramMap);
-			if (lockResult <= 0) throw new RuntimeException("예치금 잠금 처리에 실패했습니다.");
-
-			// 5. 신규 입찰 기록 Insert
-			int insertResult = dao.liveBid(paramMap);
-			if (insertResult <= 0) throw new RuntimeException("입찰 기록 저장 중 오류가 발생했습니다.");
 
 			// ==========================================
-			// [4단계] 트랜잭션 성공 후 Redis 캐시 갱신
+			// [2단계] Redisson 분산 락 획득 시도 (동일)
 			// ==========================================
-			redisTemplate.opsForValue().set(highestBidKey, String.valueOf(bidPrice), 2, TimeUnit.HOURS);
-			
-			List<LiveBidDto> latestBids = dao.getLatestLiveBids(auctionSeq);
-			
+			String lockKey = "lock:liveAuction:" + auctionSeq;
+			RLock lock = redissonClient.getLock(lockKey);
+
 			try {
-			    String latestBidsJson = objectMapper.writeValueAsString(latestBids);
-			    redisTemplate.opsForValue().set(LATEST_BIDS_KEY_PREFIX + auctionSeq, latestBidsJson, 2, TimeUnit.HOURS);
-			} catch (JsonProcessingException e) {
-			    // 변환 실패 시 로그만 찍고, 굳이 롤백시키지는 않습니다 (DB 저장은 성공했으므로)
-			    e.printStackTrace(); 
-			}
+				boolean isLocked = lock.tryLock(3, 10, TimeUnit.SECONDS);
+				if (!isLocked) {
+					result.put("status", "fail");
+					result.put("msg", "현재 접속자가 많아 입찰이 지연되고 있습니다. 다시 시도해주세요.");
+					return result;
+				}
 
-			// 결과 세팅
-			result.put("status", "success");
-			result.put("latestBids", latestBids); 
-			result.put("dtoHasHighestBid", dao.getHighestBid(auctionSeq)); 
+				// ==========================================
+				// [3단계] Critical Section (DB 이중 검증 및 비즈니스 로직 - 동일)
+				// ==========================================
+				LiveAuctionDto dtohasHighestBid = dao.getHighestBid(auctionSeq);
+				Long highestBid = null;
+				Integer highestBidMemberSeq = null;
+				
+				if (dtohasHighestBid != null && dtohasHighestBid.getHighestBid() != null) {
+					highestBid = dtohasHighestBid.getHighestBid();
+					highestBidMemberSeq = dtohasHighestBid.getHighestBidMemberSeq();
+				}
 
-			return result;
+				if (highestBid != null && bidPrice <= highestBid) {
+					// 💡 DB에서 더 높은 가격이 발견되었다면, 즉시 캐시들을 최신화해줍니다.
+					localHighestBidCache.put(auctionSeq, highestBid);
+					redisTemplate.opsForValue().set(highestBidKey, String.valueOf(highestBid), 2, TimeUnit.HOURS);
+					
+					result.put("status", "fail");
+					result.put("msg", "현재 최고가보다 높은 금액만 입찰 가능합니다.");
+					return result;
+				}
 
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			result.put("status", "fail");
-			result.put("msg", "서버 처리 중 지연이 발생했습니다.");
-			return result;
-		} finally {
-			// 작업이 끝난 후 본인이 잡은 락 해제
-			if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
-				lock.unlock();
+				// 2. 가용 예치금 실시간 검증
+				long availablePoint = dao.getAvailablePoint(memberSeq);
+				if (highestBidMemberSeq != null && highestBidMemberSeq == memberSeq) {
+					availablePoint += highestBid;
+				}
+
+				if (availablePoint < bidPrice) {
+					result.put("status", "fail");
+					result.put("msg", "가용 예치금이 부족합니다. (현재 가용액: " + availablePoint + "원)");
+					return result;
+				}
+
+				// 3. 이전 락 해제
+				if (highestBid != null && highestBid > 0) {
+					Map<String, Object> unlockMap = new HashMap<>();
+					unlockMap.put("previousMemberSeq", highestBidMemberSeq);
+					unlockMap.put("auctionSeq", auctionSeq); 
+					dao.unlockPointLock(unlockMap);
+					dao.cancelPreviousLiveBid(paramMap); 
+				}
+
+				// 4. 신규 락 생성
+				paramMap.put("auctionSeq", auctionSeq); 
+				int lockResult = dao.insertPointLock(paramMap);
+				if (lockResult <= 0) throw new RuntimeException("예치금 잠금 처리에 실패했습니다.");
+
+				// 5. 신규 입찰 기록 Insert
+				int insertResult = dao.liveBid(paramMap);
+				if (insertResult <= 0) throw new RuntimeException("입찰 기록 저장 중 오류가 발생했습니다.");
+
+				// ==========================================
+				// [4단계] 트랜잭션 성공 후 캐시 동시 갱신 (핵심!)
+				// ==========================================
+				// 1) 레디스 갱신
+				redisTemplate.opsForValue().set(highestBidKey, String.valueOf(bidPrice), 2, TimeUnit.HOURS);
+				// 2) 💥 [핫키 해결] 내 서버의 로컬 캐시도 즉시 최신 최고가로 갱신!
+				localHighestBidCache.put(auctionSeq, bidPrice);
+				
+				List<LiveBidDto> latestBids = dao.getLatestLiveBids(auctionSeq);
+				try {
+				    String latestBidsJson = objectMapper.writeValueAsString(latestBids);
+				    redisTemplate.opsForValue().set(LATEST_BIDS_KEY_PREFIX + auctionSeq, latestBidsJson, 2, TimeUnit.HOURS);
+				} catch (JsonProcessingException e) {
+				    e.printStackTrace(); 
+				}
+
+				result.put("status", "success");
+				result.put("latestBids", latestBids); 
+				result.put("dtoHasHighestBid", dao.getHighestBid(auctionSeq)); 
+
+				return result;
+
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				result.put("status", "fail");
+				result.put("msg", "서버 처리 중 지연이 발생했습니다.");
+				return result;
+			} finally {
+				if (lock != null && lock.isLocked() && lock.isHeldByCurrentThread()) {
+					lock.unlock();
+				}
 			}
 		}
-	}
 	
 //	@Transactional(rollbackFor = Exception.class)
 //	public Map<String, Object> placeLiveBid(Map<String, Object> paramMap) {
